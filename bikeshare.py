@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 import numpy as np
+import calendar
 
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
@@ -92,33 +93,70 @@ def load_data(city, month, day):
         df = df[df['day_of_week'] == day.title()]
     return df
 
-def time_stats(df, month, day):
+def time_stats(city, month, day):
     """Displays statistics on the most frequent times of travel."""
-    #df = pd.read_csv(CITY_DATA)
+    df = pd.read_csv(CITY_DATA[city])
+    df['Start Time'] = pd.to_datetime(df['Start Time'])
     
     print('\nCalculating The Most Frequent Times of Travel...\n')
     start_time = time.time()
     
     # display the most common month
     df['month'] = df['Start Time'].dt.month
-    com_month = df['month'].mode()[0]
-    print("The most popular month for bikesharing is: ", com_month)
+    com_month1 = df['month'].mode()[0]
+    com_month2 = calendar.month_name[com_month1]
+    print("The most popular month for bikesharing in {} is: {} ".format(city.title(), com_month2))
 
     # display the most common day of week
     df['day'] = df['Start Time'].dt.weekday_name
     com_day = df['day'].mode()[0]
-    print("The most popular day of the week for bikesharing is: ", com_day)
-
+    print("The most popular day of the week for bikesharing in {} is: {} ".format(city.title(), com_day))
     # display the most common start hour
     
     df['hour'] = df['Start Time'].dt.hour
     com_hour = df['hour'].mode()[0]
-    print("The most popular time for bikesharing is: ", com_hour)
+    print("The most popular hour to start bikesharing in {} is: {} ".format(city.title(), com_hour))
   
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
     return df
 
+def station_stats(city, month, day):
+    """Displays statistics on the most popular stations and trip."""
+    df = pd.read_csv(CITY_DATA[city])
+    
+    print('\nCalculating The Most Popular Stations and Trip...\n')
+    start_time = time.time()
+
+    # display most commonly used start station
+    start_station = df['Start Station'].value_counts().idxmax()
+    print("The most popular Start Station for bikesharing in {} is: {} ".format(city.title(), start_station))
+    # display most commonly used end station
+    end_station = df['End Station'].value_counts().idxmax()
+    print("The most popular End Station for bikesharing in {} is: {} ".format(city.title(), end_station))
+
+    # display most frequent combination of start station and end station trip
+    df['Trip'] = df['Start Station'] + " / " + df['End Station']
+    common_trip = df['Trip'].value_counts().idxmax()
+    print("The most common trip for bikesharing in {} is: {} ".format(city.title(), common_trip))
+
+    print("\nThis took %s seconds." % (time.time() - start_time))
+    print('-'*40)
+
+def trip_duration_stats(df):
+    """Displays statistics on the total and average trip duration."""
+
+    print('\nCalculating Trip Duration...\n')
+    start_time = time.time()
+
+    # display total travel time
+
+
+    # display mean travel time
+
+
+    print("\nThis took %s seconds." % (time.time() - start_time))
+    print('-'*40)
 
 def main():
     while True:
@@ -126,8 +164,8 @@ def main():
         #print(city, month, day)
         load_data(city, month, day)
 
-        time_stats(df, month, day)
-        #station_stats(df)
+        time_stats(city, month, day)
+        station_stats(city, month, day)
         #trip_duration_stats(df)
         #user_stats(df)
         restart = input('\nWould you like to restart? Enter yes or no.\n')
