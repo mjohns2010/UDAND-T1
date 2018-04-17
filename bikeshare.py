@@ -2,7 +2,6 @@ import time
 import pandas as pd
 import numpy as np
 import calendar
-import datetime
 
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
@@ -19,14 +18,17 @@ def get_filters(city, month, day):
     """
    
     print("Hello! Let's explore some U.S. bikeshare data!")
+    
     # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
+    
     while True:
         city = input("\nWe currently have data for Chicago, New York City, and Washington. Which city would you like to see?\n")
+        #I would often type "new york" while testing, so I included new york as a possible answer.
         if city.lower() in ('new york'):
             city = 'new york city'
             break
         elif city.lower() not in ('chicago', 'new york city', 'washington'):
-            print ("\nThat input isn't valid. Please try again.\n")
+            print ("\nThat is not a valid input. Please try again.\n")
             continue
         else:
             break       
@@ -34,9 +36,9 @@ def get_filters(city, month, day):
     # get user input for month (all, january, february, ... , june)
 
     while True:
-        month = input('\nName of the month to filter by, or "all" to apply no month filter?\n')
+        month = input('\nFor which month would you like to see data? January, February, March, April, May, June, or "all" for all months?\n')
         if month.lower() not in ('all', 'january', 'february', 'march', 'april', 'may', 'june'):
-            print ('\nThat input isn\'t valid. Please try again.\n')
+            print ('\nThat is not a valid input. Please try again.\n')
             continue
         else:
             break    
@@ -44,7 +46,7 @@ def get_filters(city, month, day):
     # get user input for day of week (all, monday, tuesday, ... sunday)
 
     while True:
-        day = input('\nName of the day to filter by, or "all" to apply no day filter?\n')
+        day = input('\nFor which day would you like to see data? Input "all" to apply no day filter.\n')
         if day.lower() not in ('all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):
             print ('\nThat input isn\'t valid. Please try again.\n')
             continue
@@ -100,9 +102,10 @@ def time_stats(df, city, month, day):
     
     # display the most common month
     df['month'] = df['Start Time'].dt.month
-    com_month1 = df['month'].mode()[0]
-    com_month2 = calendar.month_name[com_month1]
-    print("The most popular month for bikesharing in {} is: {} ".format(city.title(), com_month2))
+    com_month_1 = df['month'].mode()[0]
+    #Change month from a number to a name
+    com_month = calendar.month_name[com_month_1]
+    print("The most popular month for bikesharing in {} is: {} ".format(city.title(), com_month))
 
     # display the most common day of week
     df['day'] = df['Start Time'].dt.weekday_name
@@ -111,8 +114,21 @@ def time_stats(df, city, month, day):
     
     # display the most common start hour
     df['hour'] = df['Start Time'].dt.hour
-    com_hour = df['hour'].mode()[0]
-    print("The most popular hour to start bikesharing in {} is: {} ".format(city.title(), com_hour))
+    com_hour_0 = df['hour'].mode()[0]
+    
+    if com_hour_0 < 12:
+        com_hour = com_hour_0
+        com_hour_lbl = ":00 AM"
+    elif com_hour_0 == 12:
+        com_hour = com_hour_0
+        com_hour_lbl = ":00 PM"
+    else:
+        com_hour = com_hour_0 - 12 
+        com_hour_lbl = ":00 PM"
+
+    #Change time to military time by passing into print and defining + 1 hour.
+    #com_hour_2 = com_hour + 1
+    print("The most popular time to start bikesharing in {} is in the {}{} hour.".format(city.title(), com_hour, com_hour_lbl))
   
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -142,9 +158,9 @@ def station_stats(df, city, month, day):
 
 def trip_duration_stats(df, city, month, day):
     """Displays statistics on the total and average trip duration."""
+    #define function to change time from seconds to days, hours, minutes, seconds.
     def time_convert(time_sec):
             time = time_sec
-            time = total_duration
             days = time // (24 * 3600)
             time = time % (24 * 3600)
             hours = time // 3600
@@ -158,19 +174,17 @@ def trip_duration_stats(df, city, month, day):
     print('\nCalculating Trip Duration...\n')
     start_time = time.time()
 
-    # display total travel time
-    #total_duration = (df['Trip Duration'].sum().item())
+    # display total travel time, change to integer to pass into time_convert function
     total_duration = (int(df['Trip Duration'].sum()))
-    print(type(total_duration))
+    
     days, hours, minutes, seconds = time_convert(total_duration)
     print ("The total travel duration was {} days, {} hours, {} minutes, {} seconds.".format(days, hours, minutes, seconds))
 
-    # display mean travel time
+    # display mean travel time, change to integer to pass into time_convert function
     mean_travel = (int(df['Trip Duration'].mean()))
-    print(type(mean_travel))
-    days2, hours2, minutes2, seconds2 = time_convert(mean_travel)
-    print ("The mean travel duration was {} days, {} hours, {} minutes, {} seconds.".format(days2, hours2, minutes2, seconds2))
-    #print("the mean duration for {} in {} on {} is {} minutes.".format(city.title(), month.title(), day.title(), mean_travel))
+
+    days, hours, minutes, seconds = time_convert(mean_travel)
+    print ("The mean travel duration was {} days, {} hours, {} minutes, {} seconds.".format(days, hours, minutes, seconds))
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -184,7 +198,7 @@ def user_stats(df, city):
     # Display counts of user types
     user_values = df['User Type'].value_counts()
     
-    #dataframe[column].value_counts().index.tolist()
+    #pass in appropriate value into print line
     print("There were {} riders who were subscribers.".format(user_values[0]))
     print("There were {} riders who were customers.".format(user_values[1]))
 
@@ -200,7 +214,7 @@ def user_stats(df, city):
             print("\nThere were {} male riders.".format(gender_counts[0]))
             print("There were {} female riders.".format(gender_counts[1]))
             
-            # Display earliest, most recent, and most common year of birth
+            # Display earliest, most recent, and most common year of birth. Change to integers to eliminate .0
             earliest_year = int(df['Birth Year'].min())
             recent_year = int(df['Birth Year'].max())
             common_year = int(df['Birth Year'].value_counts().idxmax())
@@ -216,7 +230,6 @@ def user_stats(df, city):
 def main():
     while True:
         city, month, day = get_filters('chicago', 'june', 'wednesday')
-        load_data(city, month, day)
         df = load_data(city, month, day)
         time_stats(df, city, month, day)
         station_stats(df, city, month, day)
