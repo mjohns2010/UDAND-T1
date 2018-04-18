@@ -31,6 +31,7 @@ def get_filters(city, month, day):
             print ("\nThat is not a valid input. Please try again.\n")
             continue
         else:
+            city = city.lower()
             break       
     
     # get user input for month (all, january, february, ... , june)
@@ -41,6 +42,7 @@ def get_filters(city, month, day):
             print ('\nThat is not a valid input. Please try again.\n')
             continue
         else:
+            month = month.lower()
             break    
 
     # get user input for day of week (all, monday, tuesday, ... sunday)
@@ -51,6 +53,7 @@ def get_filters(city, month, day):
             print ('\nThat input isn\'t valid. Please try again.\n')
             continue
         else:
+            day = day.lower()
             break  
         
     #print(city, month, day)
@@ -93,6 +96,24 @@ def load_data(city, month, day):
         # filter by day of week to create the new dataframe
         df = df[df['day_of_week'] == day.title()]
     return df
+
+def raw_data_request(df):
+    
+    row_count = 5
+    total_rows = int(df.count()[1])
+    #while True:
+    response = input("\nWould you like to review the filtered raw data? (Yes or No).\n")
+    while row_count < total_rows:
+        if response.lower() in ('yes'):
+            rows_filtered = df.head(row_count)
+            row_count += 5
+            print(rows_filtered)
+            response = input("\nWould you like to see more data?\n")
+            continue
+        else:
+            break
+
+    print('-'*40)
 
 def time_stats(df, city, month, day):
     """Displays statistics on the most frequent times of travel."""
@@ -235,6 +256,7 @@ def main():
         station_stats(df, city, month, day)
         trip_duration_stats(df, city, month, day)
         user_stats(df, city)
+        raw_data_request(df)
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
